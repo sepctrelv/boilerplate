@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+const browser = require("./browser");
+const colors = require('colors');
+
+browser.reload();
+
+console.log(colors.green('Browser reloaded'));

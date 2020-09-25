@@ -1,0 +1,54 @@
+#!/usr/bin/env node
+
+const SVGO = require('svgo');
+const config = require('../config');
+const fs = require('fs-extra');
+const globParent = require('glob-parent');
+const expand = require('glob-expand');
+const colors = require('colors');
+const path = require('path');
+
+const svgo = new SVGO({
+  plugins: [
+    {
+      cleanupIDs: true
+    },
+    {
+      removeDimensions: true
+    }
+  ]
+});
+
+const minify = (src, dest) => {
+  fs.readFile(src, 'utf8', (err, content) => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+
+    svgo.optimize(content, { path: src }).then(function(result) {
+      fs.ensureFileSync(dest);
+      fs.writeFile(dest, result.data, err => {
+        if (err) {
+          console.error(err);
+          process.exit(1);
+        }
+
+        console.log(colors.green(`${src} minified.`));
+      });
+    });
+  });
+};
+
+const base = globParent(config.svgs.source);
+const files = expand(
+  {
+    cwd: process.cwd()
+  },
+  config.svgs.source
+);
+
+files.forEach(file => {
+  let dest = path.join(config.svgs.build, path.relative(base, file));
+  minify(file, dest);
+});

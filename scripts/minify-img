@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+
+const imagemin = require('imagemin');
+const mozJpegPlugin = require('imagemin-mozjpeg');
+const gifLossyPlugin = require('imagemin-giflossy');
+const pngquantPlugin = require('imagemin-pngquant');
+const svgoPlugin = require('imagemin-svgo');
+
+const config = require('../config');
+const colors = require('colors');
+
+imagemin([config.images.source], {
+  destination: config.images.build,
+  plugins: [
+    mozJpegPlugin({ progressive: true }),
+    pngquantPlugin(),
+    gifLossyPlugin(),
+    svgoPlugin({
+      plugins: [
+        {
+          removeViewBox: true
+        }
+      ]
+    })
+  ]
+}).then(files => {
+  files.forEach(file => {
+    console.log(colors.green(`${file.destinationPath} minified.`));
+  });
+});

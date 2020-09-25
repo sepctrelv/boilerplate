@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+
+const config = require('../config');
+const path = require('path');
+const cli = require('eslint/lib/cli');
+let argv = require('yargs-parser')(process.argv.slice(2));
+
+argv.config = path.join(__dirname, '../configs/.eslintrc');
+argv._ = [path.join(process.cwd(), config.scripts.source)];
+
+process.exitCode = cli.execute(argv);

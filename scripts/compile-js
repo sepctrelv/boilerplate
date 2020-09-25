@@ -1,0 +1,70 @@
+#!/usr/bin/env node
+
+const config = require('../config');
+const path = require('path');
+const expand = require('glob-expand');
+const fs = require('fs-extra');
+const globParent = require('glob-parent');
+const colors = require('colors');
+const rollup = require('rollup');
+const babel = require('rollup-plugin-babel');
+const commonjs = require('rollup-plugin-commonjs');
+const resolve = require('rollup-plugin-node-resolve');
+const rename = require('rename');
+
+const compile = (src, dest) => {
+  rollup
+    .rollup({
+      input: src,
+      external: ['jquery'],
+      plugins: [
+        resolve({
+          jsnext: true,
+          main: true,
+          browser: true,
+        }),
+        commonjs({
+          include: ['node_modules/**']
+        }),
+        babel({
+          babelrc: false,
+          runtimeHelpers: true,
+          presets: [['@babel/preset-env', { modules: false }]]
+        }),
+      ]
+    })
+    .then(bundle => {
+      return bundle.write({
+        file: dest,
+        format: 'umd',
+        globals: {
+          jquery: '$'
+        },
+        banner: config.banner
+      });
+    })
+    .then(() => {
+      console.log(colors.green(`${dest} generated.`));
+    })
+    .catch(error => {
+      console.error(error);
+      process.exit(1);
+    });
+};
+
+const base = globParent(config.scripts.source);
+const files = expand(
+  {
+    cwd: process.cwd()
+  },
+  config.scripts.source
+);
+
+files.forEach(file => {
+  let dest = path.join(config.scripts.build, path.relative(base, file));
+  dest = rename(dest, { extname: '.js' });
+  let filename = path.basename(dest);
+  if (!filename.match(/^_/)) {
+    compile(file, dest);
+  }
+});

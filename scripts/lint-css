@@ -1,0 +1,67 @@
+#!/usr/bin/env node
+
+const config = require('../config');
+const stylelint = require('stylelint');
+const path = require('path');
+const argv = require('yargs-parser')(process.argv.slice(2));
+const expand = require('glob-expand');
+const colors = require('colors');
+
+const files = expand(
+  {
+    cwd: process.cwd()
+  },
+  config.styles.source
+);
+
+function pluralize(word, count) {
+  return count === 1 ? word : word + 's';
+}
+
+stylelint
+  .lint({
+    configFile: path.join(__dirname, '../configs/.stylelintrc'),
+    files: files,
+    syntax: 'scss',
+    formatter: 'string',
+    fix: argv.fix || false
+  })
+  .then(function(linted) {
+    var warningsCount = 0;
+
+    if (linted.output) {
+      if (linted.errored) {
+        console.log(linted.output);
+      } else {
+        console.log(colors.green(linted.output));
+      }
+    }
+
+    warningsCount = linted.results.reduce(function(count, item) {
+      return count + item.warnings.length;
+    }, 0);
+
+    if (!linted.errored) {
+      console.log(
+        colors.green('Linted ' + files.length + ' files without errors.')
+      );
+    } else {
+      if (warningsCount > 0) {
+        console.info(
+          colors.red(
+            [
+              '\u2716 ',
+              warningsCount,
+              pluralize(' problem', warningsCount),
+              '\n'
+            ].join('')
+          )
+        );
+      }
+    }
+  })
+  .catch(function(err) {
+    console.log(err.stack);
+    const exitCode = typeof err.code === 'number' ? err.code : 1;
+    process.exit(exitCode);
+  });

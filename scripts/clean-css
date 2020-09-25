@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+
+const config = require('../config');
+const del = require('del');
+const colors = require('colors');
+
+del([config.styles.build]).then(paths => {
+  console.log(colors.green('Css dist files cleaned.'));
+});

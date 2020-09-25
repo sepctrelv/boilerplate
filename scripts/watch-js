@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+
+const gaze = require('gaze');
+const config = require('../config');
+const colors = require('colors');
+const browser = require("./browser");;
+const runAll = require('npm-run-all');
+
+console.info(colors.green(`Watch ${config.scripts.source} files`));
+
+gaze(config.scripts.source, function(err, watcher) {
+  // On file changed
+  this.on('changed', function(filepath) {
+    console.log(filepath + ' was changed');
+  });
+
+  // On file added
+  this.on('added', function(filepath) {
+    console.log(filepath + ' was added');
+  });
+
+  // On file deleted
+  this.on('deleted', function(filepath) {
+    console.log(filepath + ' was deleted');
+  });
+
+  // On changed/added/deleted
+  this.on('all', function(event, filepath) {
+    runAll(['js:compile'], {
+      parallel: false,
+      stdout: process.stdout,
+      stderr: process.stderr
+    }).then(function(){
+      browser.reload();
+    });
+  });
+});

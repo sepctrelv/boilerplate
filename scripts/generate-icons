@@ -1,0 +1,43 @@
+#!/usr/bin/env node
+
+const config = require('../config');
+const fs = require('fs-extra');
+const path = require('path');
+const colors = require('colors');
+const webfont = require('webfont').default;
+
+webfont({
+  files: config.icons.source,
+  fontName: config.icons.fontName,
+  fontHeight: 128,
+  normalize: true,
+  formats: ['svg', 'ttf', 'eot', 'woff', 'woff2'],
+  fileName: config.icons.fileName,
+  template: config.icons.template,
+  templateClassName: 'icon',
+  templateFontPath: config.icons.fontPath,
+  templateFontName: config.icons.fontName
+}).then((result) => {
+  fs.ensureDir(config.icons.build,err => {
+    if(result.template) {
+      fs.writeFileSync(config.icons.templateDist, result.template);
+    }
+    if(result.svg) {
+      fs.writeFileSync(path.join(config.icons.build, `${config.icons.fileName}.svg`), result.svg);
+    }
+    if(result.ttf) {
+      fs.writeFileSync(path.join(config.icons.build, `${config.icons.fileName}.ttf`), new Buffer(result.ttf));
+    }
+    if(result.eot) {
+      fs.writeFileSync(path.join(config.icons.build, `${config.icons.fileName}.eot`), new Buffer(result.eot));
+    }
+    if(result.woff) {
+      fs.writeFileSync(path.join(config.icons.build, `${config.icons.fileName}.woff`), new Buffer(result.woff));
+    }
+    if(result.woff2) {
+      fs.writeFileSync(path.join(config.icons.build, `${config.icons.fileName}.woff2`), new Buffer(result.woff2));
+    }
+
+    console.log(colors.green('Icons generated.'));
+  })
+});

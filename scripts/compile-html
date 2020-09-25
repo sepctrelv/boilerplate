@@ -1,0 +1,66 @@
+#!/usr/bin/env node
+
+const config = require('../config');
+const path = require('path');
+const expand = require('glob-expand');
+const fs = require('fs-extra');
+const globParent = require('glob-parent');
+const colors = require('colors');
+const handlebars = require('handlebars');
+const rename = require('rename');
+const handlebarsWax = require('handlebars-wax');
+const fm = require('front-matter');
+
+const wax = handlebarsWax(handlebars)
+  // Partials
+  .partials(config.html.partials)
+  .partials(config.html.layouts)
+
+  // Data
+  .data(config.html.data)
+  .data(config.html.metadata)
+
+  // Helpers
+  .helpers(require('handlebars-layouts'))
+  .helpers(require('handlebars-helpers')(['comparison', 'markdown']))
+  .helpers(config.html.helpers);
+
+const compile = (src, dest) => {
+  fs.readFile(src, 'utf8', (err, content) => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+
+    let data = fm(content);
+
+    let template = wax.compile(data.body);
+    let result = template({
+      frontMatter: data.attributes,
+      file: {
+        path: src,
+        cwd: process.cwd()
+      }
+    });
+
+    fs.ensureFileSync(dest);
+    fs.writeFileSync(dest, result);
+
+    console.log(colors.green(`${dest} generated.`));
+  });
+};
+
+const base = globParent(config.html.pages);
+const files = expand(
+  {
+    cwd: process.cwd()
+  },
+  config.html.pages
+);
+
+files.forEach(file => {
+  let dest = path.join(config.html.build, path.relative(base, file));
+  dest = rename(dest, { extname: '.html' });
+
+  compile(file, dest);
+});

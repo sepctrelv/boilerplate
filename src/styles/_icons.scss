@@ -1,0 +1,27 @@
+$icon-list: "\ea04";
+
+@font-face {
+  font-family: creation-landing-icons;
+  src: url("../icons/icons.eot");
+  src: url("../icons/icons.eot?#iefix") format("embedded-opentype"), url("../icons/icons.woff2") format("woff2"), url("../icons/icons.woff") format("woff"), url("../icons/icons.ttf") format("truetype"), url("../icons/icons.svg#creation-landing-icons") format("svg");
+  font-style: normal;
+  font-weight: 400;
+}
+
+%icon {
+  display: inline-block;
+  transform: translate(0, 0);
+  text-rendering: auto;
+  font: normal normal 400 14px/1 creation-landing-icons;
+  font-size: inherit;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+}
+
+.icon {
+  @extend %icon;
+}
+
+.icon-list::before {
+  content: $icon-list;
+}

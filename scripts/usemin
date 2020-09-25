@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+
+const config = require('../config');
+const path = require('path');
+const expand = require('glob-expand');
+const fs = require('fs-extra');
+const globParent = require('glob-parent');
+const colors = require('colors');
+const usemin = require('usemin');
+
+const files = expand(
+  {
+    cwd: process.cwd()
+  },
+  [`${config.html.build}/**/*.html`]
+);
+
+files.forEach(file => {
+  usemin(file, config.html.build, {
+    output: file,
+    htmlmin: true,
+    config: {
+      uglifyjs: {},
+      cleancss: {},
+      htmlminifier: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeEmptyAttributes: true,
+        removeScriptTypeAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        minifyJS: false,
+        minifyCSS: false
+      }
+    },
+    removeLivereload: true
+  });
+
+  console.log(colors.green(`${file} minified.`));
+});

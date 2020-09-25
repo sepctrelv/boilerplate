@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+
+const config = require('../config');
+const fs = require('fs');
+const colors = require('colors');
+const AssetsManager = require('assets-manager');
+
+const manager = new AssetsManager(config.vendor.manifest, config.vendor);
+
+manager.cleanPackages().then(()=>{
+  console.log(colors.green('Vendor cleaned.'));
+});

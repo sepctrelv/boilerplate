@@ -1,0 +1,38 @@
+#!/usr/bin/env node
+
+const uglifyJS = require('uglify-es');
+const config = require('../config');
+const fs = require('fs');
+const expand = require('glob-expand');
+const colors = require('colors');
+const rename = require('rename');
+
+const minify = file => {
+  fs.readFile(file, 'utf8', (err, content) => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+
+    let result = uglifyJS.minify(content);
+    fs.writeFile(rename(file, { suffix: '.min' }), result.code, err => {
+      if (err) {
+        console.error(err);
+        process.exit(1);
+      }
+
+      console.log(colors.green(`${file} minified.`));
+    });
+  });
+};
+
+const files = expand(
+  {
+    cwd: process.cwd()
+  },
+  [`${config.scripts.build}/**/*.js`, `!${config.scripts.build}/**/*.min.js`]
+);
+
+files.forEach(file => {
+  minify(file);
+});

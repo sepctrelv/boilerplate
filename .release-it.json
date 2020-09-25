@@ -1,0 +1,13 @@
+{
+  "src": {
+    "tagName": "v%s"
+  },
+  "github": {
+    "release": false
+  },
+  "npm": {
+    "publish": false
+  },
+  "requireUpstream": false,
+  "requireCleanWorkingDir": false
+}
