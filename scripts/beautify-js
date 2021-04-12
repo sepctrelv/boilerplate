@@ -19,7 +19,7 @@ const beautify = file => {
       semi: true,
       singleQuote: true,
       bracketSpacing: true,
-      parser: 'babylon'
+      parser: 'babel'
     });
 
     if (data) {
